@@ -2,13 +2,13 @@ import requests
 import json
 import pprint
 
-fedex_url = "https://apis-sandbox.fedex.com/"
+fedex_url = "https://apis.fedex.com/"
 
 auth_url = fedex_url+"oauth/token"
 auth_input = {
     'grant_type': 'client_credentials',
-    'client_id': 'l745348f4bffe544988058d45686377aa4',
-    'client_secret': '29470d65a125454b95d0607468a9dcb9'
+    'client_id': 'l7277fd88307004a7fb0878d55f17649e9',
+    'client_secret': '91bb6c90813c4338a26f6eb9d44c311a'
 }
 auth_payload = auth_input
 auth_headers = {
@@ -16,6 +16,7 @@ auth_headers = {
     }
 auth_response = requests.request("POST", auth_url, data=auth_payload, headers=auth_headers)
 response_dict = json.loads(auth_response.text)
+print(response_dict)
 access_token = response_dict['access_token']
 
 track_url = fedex_url+"track/v1/associatedshipments"
