@@ -1,6 +1,5 @@
 import requests
 import json
-import pprint
 
 fedex_url = "https://apis.fedex.com/"
 
@@ -16,7 +15,6 @@ auth_headers = {
     }
 auth_response = requests.request("POST", auth_url, data=auth_payload, headers=auth_headers)
 response_dict = json.loads(auth_response.text)
-print(response_dict)
 access_token = response_dict['access_token']
 
 track_url = fedex_url+"track/v1/associatedshipments"
@@ -24,7 +22,7 @@ track_input = json.dumps({
     "associatedType": "STANDARD_MPS",
     "masterTrackingNumberInfo": {
         "trackingNumberInfo": {
-            "trackingNumber": "122816215025810"
+            "trackingNumber": "776947146685"
             }
     }
 })
@@ -35,4 +33,5 @@ track_headers = {
     }
 track_response = requests.request("POST", track_url, data=track_input, headers=track_headers)
 print(track_headers)
-pprint.pprint(track_response.text)
+tracking_dict = json.loads(track_response.text)
+print(json.dumps(tracking_dict, indent=4, sort_keys=True))
