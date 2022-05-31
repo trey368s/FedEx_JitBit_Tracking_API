@@ -38,9 +38,9 @@ def track(tracking_number):
         'Authorization': "Bearer " + access_token
     }
     track_response = requests.request("POST", track_url, data=track_input, headers=track_headers)
-    print(track_headers)
+    print(track_headers["Authorization"])
     tracking_dict = json.loads(track_response.text)
-    print(json.dumps(tracking_dict, indent=4, sort_keys=True))
+    print(json.dumps(tracking_dict["output"]["completeTrackResults"][0]["trackResults"][0]["scanEvents"], indent=4))
 
 
 track(tracking_number)
