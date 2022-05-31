@@ -1,7 +1,7 @@
 import requests
 import json
 
-tracking_number = "776947146685"
+tracking_number = "776982404873"
 
 
 def track(tracking_number):
@@ -21,14 +21,16 @@ def track(tracking_number):
     response_dict = json.loads(auth_response.text)
     access_token = response_dict['access_token']
 
-    track_url = fedex_url + "track/v1/associatedshipments"
+    track_url = fedex_url + "track/v1/trackingnumbers"
     track_input = json.dumps({
-        "associatedType": "STANDARD_MPS",
-        "masterTrackingNumberInfo": {
-            "trackingNumberInfo": {
-                "trackingNumber": tracking_number
+        "includeDetailedScans": True,
+        "trackingInfo": [
+            {
+                "trackingNumberInfo": {
+                    "trackingNumber": tracking_number
+                }
             }
-        }
+        ]
     })
     track_headers = {
         'Content-Type': "application/json",
