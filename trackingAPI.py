@@ -6,7 +6,7 @@ import config
 import json
 import requests
 
-tracking_number = "777001279771"
+tracking_number = "776958984516"
 
 
 def track(tracking_number):
@@ -51,11 +51,16 @@ def track(tracking_number):
 
 
 def getTickets():
-    jitbit_url = "https://shsupport.jitbit.com/helpdesk/api/tickets"
+    jitbit_url = "https://shsupport.jitbit.com/helpdesk/api/tickets?mode=handledbyme&count=300"
     jitbit_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
     jitbit_response = requests.get(url=jitbit_url, auth=jitbit_auth)
     tickets = json.loads(jitbit_response.content)
+    print(jitbit_auth)
     print(json.dumps(tickets, indent=4))
+    assigned_tickets_list = []
+    for x in range(len(tickets)):
+        assigned_tickets_list.append(json.dumps(tickets[x]["IssueID"]))
+    print(assigned_tickets_list)
 
 
 track(tracking_number)
