@@ -1,4 +1,10 @@
-import requests, json, config
+import base64
+
+from requests.auth import HTTPBasicAuth
+
+import config
+import json
+import requests
 
 tracking_number = "777001279771"
 
@@ -17,7 +23,7 @@ def track(tracking_number):
     auth_headers = {
         'Content-Type': "application/x-www-form-urlencoded"
     }
-    auth_response = requests.request("POST", auth_url, data=auth_payload, headers=auth_headers)
+    auth_response = requests.request("POST", url=auth_url, data=auth_payload, headers=auth_headers)
     response_dict = json.loads(auth_response.text)
     access_token = response_dict['access_token']  # Get bearer token out of json response
     # FedEx Track API Documentation
@@ -38,10 +44,16 @@ def track(tracking_number):
         'X-locale': "en_US",
         'Authorization': "Bearer " + access_token  # Adds access token to header for authorization
     }
-    track_response = requests.request("POST", track_url, data=track_input, headers=track_headers)
+    track_response = requests.request("POST", url=track_url, data=track_input, headers=track_headers)
     tracking_dict = json.loads(track_response.text)  # Make dictionary out of json response
     print("FedEx " + track_headers["Authorization"])
     print(json.dumps(tracking_dict["output"]["completeTrackResults"][0]["trackResults"][0]["scanEvents"], indent=4))
 
 
 track(tracking_number)
+
+jitbit_url = "https://shsupport.jitbit.com/helpdesk/api/tickets"
+jitbit_auth = HTTPBasicAuth('tstegeman@senneca.com', 'Password1!')
+jitbit_response = requests.get(url=jitbit_url, auth=jitbit_auth)
+tickets = json.loads(jitbit_response.content)
+print(json.dumps(tickets, indent=4))
