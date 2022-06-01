@@ -50,10 +50,13 @@ def track(tracking_number):
     print(json.dumps(tracking_dict["output"]["completeTrackResults"][0]["trackResults"][0]["scanEvents"], indent=4))
 
 
-track(tracking_number)
+def getTickets():
+    jitbit_url = "https://shsupport.jitbit.com/helpdesk/api/tickets"
+    jitbit_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
+    jitbit_response = requests.get(url=jitbit_url, auth=jitbit_auth)
+    tickets = json.loads(jitbit_response.content)
+    print(json.dumps(tickets, indent=4))
 
-jitbit_url = "https://shsupport.jitbit.com/helpdesk/api/tickets"
-jitbit_auth = HTTPBasicAuth('tstegeman@senneca.com', 'Password1!')
-jitbit_response = requests.get(url=jitbit_url, auth=jitbit_auth)
-tickets = json.loads(jitbit_response.content)
-print(json.dumps(tickets, indent=4))
+
+track(tracking_number)
+getTickets()
