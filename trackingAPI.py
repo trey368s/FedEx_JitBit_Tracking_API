@@ -1,5 +1,4 @@
-import requests
-import json
+import requests, json, config
 
 tracking_number = "777001279771"
 
@@ -11,8 +10,8 @@ def track(tracking_number):
     auth_url = fedex_url + "oauth/token"
     auth_input = {
         'grant_type': 'client_credentials',
-        'client_id': 'l7277fd88307004a7fb0878d55f17649e9',
-        'client_secret': '91bb6c90813c4338a26f6eb9d44c311a'
+        'client_id': config.API_KEY,  # Public key
+        'client_secret': config.API_SECRET  # Secret key
     }
     auth_payload = auth_input
     auth_headers = {
