@@ -1,8 +1,8 @@
 from requests.auth import HTTPBasicAuth
+from datetime import datetime
 import config
 import json
 import requests
-from datetime import datetime
 
 
 def getTicketsList():
@@ -64,8 +64,7 @@ def track(tracking_number):
     track_response = requests.request("POST", url=track_url, data=track_input, headers=track_headers)
     tracking_dict = json.loads(track_response.text)  # Make dictionary out of json response
     print("FedEx " + track_headers["Authorization"])
-    return json.dumps(tracking_dict["output"]["completeTrackResults"][0]["trackResults"][0],
-                      indent=4)  # Get scan events
+    return json.dumps(tracking_dict["output"]["completeTrackResults"][0]["trackResults"][0], indent=4)  # Get scan events
 
 
 def createTrackingUpdate(track_info):
@@ -79,9 +78,12 @@ def createTrackingUpdate(track_info):
             scan_events["scanEvents"][0]['date'].split('T')[0] + ".")
 
 
-def commentTrackingUpdate(track_update):
+def commentTrackingUpdate(track_update, ticket_number):
+    jitbit_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comment?id=" + str(ticket_number) + "&body=" + track_update
+    jitbit_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
+    comment = requests.get(url=jitbit_url, auth=jitbit_auth)
 
 
 
 getTicketsList()
-createTrackingUpdate(track(getTrackingNumber(48524901)))
+commentTrackingUpdate(createTrackingUpdate(track(getTrackingNumber(48569665))), 48569665)
