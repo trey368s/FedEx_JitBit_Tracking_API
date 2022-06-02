@@ -64,20 +64,24 @@ def track(tracking_number):
     track_response = requests.request("POST", url=track_url, data=track_input, headers=track_headers)
     tracking_dict = json.loads(track_response.text)  # Make dictionary out of json response
     print("FedEx " + track_headers["Authorization"])
-    return json.dumps(tracking_dict["output"]["completeTrackResults"][0]["trackResults"][0], indent=4)  # Get scan events
+    return json.dumps(tracking_dict["output"]["completeTrackResults"][0]["trackResults"][0],
+                      indent=4)  # Get scan events
 
 
 def createTrackingUpdate(track_info):
     scan_events = json.loads(track_info)
     time = datetime.strptime(scan_events["scanEvents"][0]['date'].split('T')[1][0:5], "%H:%M")
-    print("AUTOMATED TRACKING UPDATE: " +
-          scan_events["scanEvents"][0]['eventDescription'] + " in " +
-          scan_events["scanEvents"][0]['scanLocation']['city'].title() + ", " +
-          scan_events["scanEvents"][0]['scanLocation']['stateOrProvinceCode'] + " at " +
-          time.strftime("%I:%M%p") + " " +
-          scan_events["scanEvents"][0]['date'].split('T')[0] + ".")
+    return ("AUTOMATED TRACKING UPDATE: " +
+            scan_events["scanEvents"][0]['eventDescription'] + " in " +
+            scan_events["scanEvents"][0]['scanLocation']['city'].title() + ", " +
+            scan_events["scanEvents"][0]['scanLocation']['stateOrProvinceCode'] + " at " +
+            time.strftime("%I:%M%p") + " " +  # Convert 24hr time to 12 hr
+            scan_events["scanEvents"][0]['date'].split('T')[0] + ".")
+
+
+def commentTrackingUpdate(track_update):
+
 
 
 getTicketsList()
 createTrackingUpdate(track(getTrackingNumber(48524901)))
-
