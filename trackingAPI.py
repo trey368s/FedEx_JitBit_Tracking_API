@@ -6,7 +6,7 @@ import requests
 
 
 def getTicketsList():
-    jitbit_url = "https://shsupport.jitbit.com/helpdesk/api/tickets?mode=handledbyme&count=300"
+    jitbit_url = "https://shsupport.jitbit.com/helpdesk/api/" + "tickets?mode=handledbyme&count=300"
     # JitBit Helpdesk API Documentation
     # https://www.jitbit.com/helpdesk/helpdesk-api/#/
     jitbit_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)  # Basic authorization headers
@@ -20,7 +20,7 @@ def getTicketsList():
 
 
 def getTrackingNumber(ticket_number):
-    jitbit_url = "https://shsupport.jitbit.com/helpdesk/api/ticket?id=" + str(ticket_number)
+    jitbit_url = "https://shsupport.jitbit.com/helpdesk/api/" + "ticket?id=" + str(ticket_number)
     jitbit_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)  # Basic authorization headers
     jitbit_response = requests.get(url=jitbit_url, auth=jitbit_auth)
     ticket = json.loads(jitbit_response.content)  # Tickets detailed information
@@ -74,16 +74,24 @@ def createTrackingUpdate(track_info):
             scan_events["scanEvents"][0]['eventDescription'] + " in " +
             scan_events["scanEvents"][0]['scanLocation']['city'].title() + ", " +
             scan_events["scanEvents"][0]['scanLocation']['stateOrProvinceCode'] + " at " +
-            time.strftime("%I:%M%p") + " " +  # Convert 24hr time to 12 hr
+            time.strftime("%I:%M%p").lstrip('0') + " " +  # Convert 24hr time to 12 hr and strip leading zero
             scan_events["scanEvents"][0]['date'].split('T')[0] + ".")
 
 
 def commentTrackingUpdate(track_update, ticket_number):
-    jitbit_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comment?id=" + str(ticket_number) + "&body=" + track_update
-    jitbit_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
-    comment = requests.get(url=jitbit_url, auth=jitbit_auth)
+    get_comments_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comments?id=" + str(ticket_number)
+    get_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
+    comments = requests.get(url=get_comments_url, auth=get_comments_auth)
+    already_contains_comment = False
+    for x in range(0, len(json.loads(comments.text))):
+        if json.loads(comments.text)[x]["Body"][11:] == track_update:
+            already_contains_comment = True
+    if not already_contains_comment:
+        post_comments_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comment?id=" + str(ticket_number) + "&body=" + track_update
+        post_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
+        requests.get(url=post_comments_url, auth=post_comments_auth)
 
 
 
-getTicketsList()
+print(getTicketsList())
 commentTrackingUpdate(createTrackingUpdate(track(getTrackingNumber(48569665))), 48569665)
