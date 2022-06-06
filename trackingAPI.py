@@ -3,6 +3,7 @@ from datetime import datetime
 import config
 import json
 import requests
+import time
 
 
 def getTicketsList():
@@ -68,7 +69,7 @@ def track(tracking_number):
 
 
 def createTrackingUpdate(track_info):
-    scan_events = json.loads(track_info)
+    scan_events = json.loads(track_info)  # Load scan events into JSON.
     time = datetime.strptime(scan_events["scanEvents"][0]['date'].split('T')[1][0:5], "%H:%M")
     return ("AUTOMATED TRACKING UPDATE: " +
             scan_events["scanEvents"][0]['eventDescription'] + " in " +
@@ -92,6 +93,11 @@ def commentTrackingUpdate(track_update, ticket_number):
         requests.get(url=post_comments_url, auth=post_comments_auth)
 
 
-
-print(getTicketsList())
-commentTrackingUpdate(createTrackingUpdate(track(getTrackingNumber(48569665))), 48569665)
+ticket_list = getTicketsList()
+while True:
+    for x in range(0, len(getTicketsList())):
+        try:
+            commentTrackingUpdate(createTrackingUpdate(track(getTrackingNumber(48569665))), 48569665)
+        except IndexError:
+            continue
+    time.sleep(300)
