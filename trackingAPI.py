@@ -1,9 +1,9 @@
-from requests.auth import HTTPBasicAuth
-from datetime import datetime
 import config
 import json
 import requests
 import time
+from requests.auth import HTTPBasicAuth
+from datetime import datetime
 
 
 def getTicketsList():
@@ -25,7 +25,7 @@ def getTrackingNumber(ticket_number):
     jitbit_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)  # Basic authorization headers
     jitbit_response = requests.get(url=jitbit_url, auth=jitbit_auth)
     ticket = json.loads(jitbit_response.content)  # Tickets detailed information
-    return str(json.dumps(ticket["Tags"][0]["Name"])[1:-1])  # Return ticket's tag
+    return str(json.dumps(ticket["Tags"][0]["Name"])[1:-1])  # Return ticket's tag that has tracking number
 
 
 def track(tracking_number):
@@ -42,7 +42,7 @@ def track(tracking_number):
         'Content-Type': "application/x-www-form-urlencoded"
     }
     auth_response = requests.request("POST", url=auth_url, data=auth_payload, headers=auth_headers)
-    response_dict = json.loads(auth_response.text)  # Turn json response into dictionary
+    response_dict = json.loads(auth_response.text)  # Turn JSON response into dictionary
     access_token = response_dict['access_token']  # Get bearer token out of response dictionary
     # FedEx Track API Documentation
     # https://developer.fedex.com/api/en-us/catalog/track/docs.html
@@ -70,12 +70,12 @@ def track(tracking_number):
 
 def createTrackingUpdate(track_info):
     scan_events = json.loads(track_info)  # Load scan events into JSON.
-    time = datetime.strptime(scan_events["scanEvents"][0]['date'].split('T')[1][0:5], "%H:%M")
+    scan_time = datetime.strptime(scan_events["scanEvents"][0]['date'].split('T')[1][0:5], "%H:%M")
     return ("AUTOMATED TRACKING UPDATE: " +
             scan_events["scanEvents"][0]['eventDescription'] + " in " +
             scan_events["scanEvents"][0]['scanLocation']['city'].title() + ", " +
             scan_events["scanEvents"][0]['scanLocation']['stateOrProvinceCode'] + " at " +
-            time.strftime("%I:%M%p").lstrip('0') + " " +  # Convert 24hr time to 12 hr and strip leading zero
+            scan_time.strftime("%I:%M%p").lstrip('0') + " " +  # Convert 24hr time to 12 hr and strip leading zero
             scan_events["scanEvents"][0]['date'].split('T')[0] + ".")
 
 
@@ -93,11 +93,25 @@ def commentTrackingUpdate(track_update, ticket_number):
         requests.get(url=post_comments_url, auth=post_comments_auth)
 
 
+def checkForDelivered(ticket_number):
+    get_comments_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comments?id=" + str(ticket_number)
+    get_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
+    comments = requests.get(url=get_comments_url, auth=get_comments_auth)
+    delivery_inquiry = "AUTOMATED TRACKING UPDATE: Your package shows as delivered, have you received it? Please respond with a single letter [Y/N]."
+    for x in range(0, len(json.loads(comments.text))):
+        if json.loads(comments.text)[x]["Body"][11:47] == "AUTOMATED TRACKING UPDATE: Delivered" and json.loads(comments.text)[0]["Body"][11:] != delivery_inquiry:
+            post_comments_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comment?id=" + str(ticket_number) + "&body=" + delivery_inquiry
+            post_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
+            requests.get(url=post_comments_url, auth=post_comments_auth)
+
+
 ticket_list = getTicketsList()
 while True:
     for x in range(0, len(getTicketsList())):
+        print("Checking ticket #" + ticket_list[x])
         try:
             commentTrackingUpdate(createTrackingUpdate(track(getTrackingNumber(48569665))), 48569665)
         except IndexError:
             continue
+        checkForDelivered(48569665)
     time.sleep(300)
