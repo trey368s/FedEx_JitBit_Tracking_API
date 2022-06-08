@@ -82,12 +82,12 @@ def createTrackingUpdate(track_info):
 def commentTrackingUpdate(track_update, ticket_number):
     get_comments_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comments?id=" + str(ticket_number)
     get_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
-    comments = requests.get(url=get_comments_url, auth=get_comments_auth)
+    comments = requests.get(url=get_comments_url, auth=get_comments_auth)  # Gets all comments on ticket
     already_contains_comment = False
-    for x in range(0, len(json.loads(comments.text))):
+    for x in range(0, len(json.loads(comments.text))):  # Loops through all comments looking for duplicates
         if json.loads(comments.text)[x]["Body"][11:] == track_update:
             already_contains_comment = True
-    if not already_contains_comment:
+    if not already_contains_comment:  # If there are no duplicates post the comment
         post_comments_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comment?id=" + str(ticket_number) + "&body=" + track_update
         post_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
         requests.get(url=post_comments_url, auth=post_comments_auth)
@@ -96,13 +96,13 @@ def commentTrackingUpdate(track_update, ticket_number):
 def checkForDelivered(ticket_number):
     get_comments_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comments?id=" + str(ticket_number)
     get_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
-    comments = requests.get(url=get_comments_url, auth=get_comments_auth)
+    comments = requests.get(url=get_comments_url, auth=get_comments_auth)  # Gets all comments on ticket
     delivery_inquiry = "AUTOMATED TRACKING UPDATE: Your package shows as delivered, have you received it? Please respond with a single letter [Y/N]."
-    for x in range(0, len(json.loads(comments.text))):
+    for x in range(0, len(json.loads(comments.text))):  # Loops through all comments on ticket
         if json.loads(comments.text)[x]["Body"][11:47] == "AUTOMATED TRACKING UPDATE: Delivered" and json.loads(comments.text)[0]["Body"][11:] != delivery_inquiry:
             post_comments_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comment?id=" + str(ticket_number) + "&body=" + delivery_inquiry
             post_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
-            requests.get(url=post_comments_url, auth=post_comments_auth)
+            requests.get(url=post_comments_url, auth=post_comments_auth)  # Posts comment if it has been delivered and if it hasn't been commented already
 
 
 ticket_list = getTicketsList()
