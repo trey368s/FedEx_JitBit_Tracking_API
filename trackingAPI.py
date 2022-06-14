@@ -98,8 +98,12 @@ def checkForDelivered(ticket_number):
     get_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
     comments = requests.get(url=get_comments_url, auth=get_comments_auth)  # Gets all comments on ticket
     delivery_inquiry = "AUTOMATED TRACKING UPDATE: Your package shows as delivered, have you received it? Please respond with a single letter [Y/N]."
+    commented_delivery_inquiry = False
     for x in range(0, len(json.loads(comments.text))):  # Loops through all comments on ticket
-        if json.loads(comments.text)[x]["Body"][11:47] == "AUTOMATED TRACKING UPDATE: Delivered" and json.loads(comments.text)[0]["Body"][11:] != delivery_inquiry:
+        if json.loads(comments.text)[x]["Body"][11:] == delivery_inquiry:  # Checks if delivery inquiry has been commented
+            commented_delivery_inquiry = True
+    for y in range(0, len(json.loads(comments.text))):  # Goes through tickets checking for delivered and delivery inquiry
+        if not commented_delivery_inquiry and json.loads(comments.text)[y]["Body"][11:47] == "AUTOMATED TRACKING UPDATE: Delivered":
             post_comments_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comment?id=" + str(ticket_number) + "&body=" + delivery_inquiry
             post_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
             requests.get(url=post_comments_url, auth=post_comments_auth)  # Posts comment if it has been delivered and if it hasn't been commented already
