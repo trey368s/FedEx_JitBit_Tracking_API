@@ -90,6 +90,9 @@ def commentTrackingUpdate(track_update, ticket_number):
         post_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
         requests.get(url=post_comments_url, auth=post_comments_auth)
         print(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + track_update)
+        log = open("log.txt", "a")
+        log.write(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + track_update + "\n")
+        log.close()
 
 
 def checkForDelivered(ticket_number):
@@ -107,6 +110,9 @@ def checkForDelivered(ticket_number):
             post_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
             requests.get(url=post_comments_url, auth=post_comments_auth)  # Posts comment if it has been delivered and if it hasn't been commented already
             print(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + delivery_inquiry)
+            log = open("log.txt", "a")
+            log.write(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + delivery_inquiry + "\n")
+            log.close()
 
 
 def checkForResponse(ticket_number):
@@ -127,6 +133,9 @@ def checkForResponse(ticket_number):
         close_ticket_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
         requests.request("POST", url=close_ticket_url, auth=close_ticket_auth)  # Closes ticket
         print(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + close_ticket)
+        log = open("log.txt", "a")
+        log.write(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + close_ticket + "\n")
+        log.close()
     if commented_delivery_inquiry and json.loads(comments.text)[0]["Body"][11:12].capitalize() == "N":
         post_comments_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comment?id=" + str(ticket_number) + "&body=" + getTrackingNumber(ticket_number) + "&forTechsOnly=True"
         post_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
@@ -135,18 +144,22 @@ def checkForResponse(ticket_number):
         alert_tech_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
         requests.request("POST", url=alert_tech_url, auth=alert_tech_auth)  # Adds tag to alert technician
         print(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + "Needs Technician")
+        log = open("log.txt", "a")
+        log.write(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + "Needs Technician" + "\n")
+        log.close()
 
 
-ticket_list = getTicketsList()
 while True:
+    ticket_list = getTicketsList()
     for x in range(0, len(getTicketsList())):
         print(str(datetime.utcnow()) + "> Checking ticket #" + ticket_list[x])
+        console = open("log.txt", "a")
+        console.write(str(datetime.utcnow()) + "> Checking ticket #" + ticket_list[x] + "\n")
+        console.close()
         try:
-            commentTrackingUpdate(createTrackingUpdate(track(getTrackingNumber(48569665))), 48569665)
-            checkForDelivered(48569665)
-            checkForResponse(48569665)
+            commentTrackingUpdate(createTrackingUpdate(track(getTrackingNumber(ticket_list[x]))), ticket_list[x])
+            checkForDelivered(ticket_list[x])
+            checkForResponse(ticket_list[x])
         except IndexError:
             continue
     time.sleep(300)
-
-# 777050014078
