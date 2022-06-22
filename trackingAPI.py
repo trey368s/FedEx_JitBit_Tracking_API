@@ -69,12 +69,18 @@ def track(tracking_number):
 def create_tracking_update(track_info):
     scan_events = json.loads(track_info)  # Load scan events into JSON.
     scan_time = datetime.strptime(scan_events["scanEvents"][0]['date'].split('T')[1][0:5], "%H:%M")
-    return ("AUTOMATED TRACKING UPDATE: " +
-            scan_events["scanEvents"][0]['eventDescription'] + " in " +
-            scan_events["scanEvents"][0]['scanLocation']['city'].title() + ", " +
-            scan_events["scanEvents"][0]['scanLocation']['stateOrProvinceCode'] + " at " +
-            scan_time.strftime("%I:%M%p").lstrip('0') + " " +  # Convert 24hr time to 12 hr and strip leading zero
-            scan_events["scanEvents"][0]['date'].split('T')[0] + ".")
+    try:
+        return ("AUTOMATED TRACKING UPDATE: " +
+                scan_events["scanEvents"][0]['eventDescription'] + " in " +
+                scan_events["scanEvents"][0]['scanLocation']['city'].title() + ", " +
+                scan_events["scanEvents"][0]['scanLocation']['stateOrProvinceCode'] + " at " +
+                scan_time.strftime("%I:%M%p").lstrip('0') + " " +  # Convert 24hr time to 12 hr and strip leading zero
+                scan_events["scanEvents"][0]['date'].split('T')[0] + ".")
+    except KeyError:
+        return ("AUTOMATED TRACKING UPDATE: " +
+                scan_events["scanEvents"][0]['eventDescription'] + " at " +
+                scan_time.strftime("%I:%M%p").lstrip('0') + " " +  # Convert 24hr time to 12 hr and strip leading zero
+                scan_events["scanEvents"][0]['date'].split('T')[0] + ".")
 
 
 def comment_tracking_update(track_update, ticket_number):
