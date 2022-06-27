@@ -24,7 +24,7 @@ def get_tracking_number(ticket_number):
     jitbit_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)  # Basic authorization headers
     jitbit_response = requests.get(url=jitbit_url, auth=jitbit_auth)
     ticket = json.loads(jitbit_response.content)  # Tickets detailed information
-    return str(json.dumps(ticket["Tags"][0]["Name"])[1:-1])  # Return ticket's tag that has tracking number
+    return str(json.dumps(ticket["Tags"][0]["Name"])[1:-1])  # Return ticket's tag that has tracking number in it
 
 
 def track(tracking_number):
@@ -63,20 +63,25 @@ def track(tracking_number):
     }
     track_response = requests.request("POST", url=track_url, data=track_input, headers=track_headers)
     tracking_dict = json.loads(track_response.text)  # Make dictionary out of json response
-    return json.dumps(tracking_dict["output"]["completeTrackResults"][0]["trackResults"][0], indent=4)  # Get scan events
+    try:
+        return json.dumps(tracking_dict["output"]["completeTrackResults"][0]["trackResults"][0], indent=4)  # Get scan events
+    except KeyError:  # Prevents crashing due to inability to track
+        return ""
 
 
 def create_tracking_update(track_info):
     scan_events = json.loads(track_info)  # Load scan events into JSON.
     scan_time = datetime.strptime(scan_events["scanEvents"][0]['date'].split('T')[1][0:5], "%H:%M")
-    try:
+    if track_info is None:  # If you can't track pass no update
+        return ""
+    try:  # Returns typical tracking update
         return ("AUTOMATED TRACKING UPDATE: " +
                 scan_events["scanEvents"][0]['eventDescription'] + " in " +
                 scan_events["scanEvents"][0]['scanLocation']['city'].title() + ", " +
                 scan_events["scanEvents"][0]['scanLocation']['stateOrProvinceCode'] + " at " +
                 scan_time.strftime("%I:%M%p").lstrip('0') + " " +  # Convert 24hr time to 12 hr and strip leading zero
                 scan_events["scanEvents"][0]['date'].split('T')[0] + ".")
-    except KeyError:
+    except KeyError:  # Prevents crashing due to no location in update
         return ("AUTOMATED TRACKING UPDATE: " +
                 scan_events["scanEvents"][0]['eventDescription'] + " at " +
                 scan_time.strftime("%I:%M%p").lstrip('0') + " " +  # Convert 24hr time to 12 hr and strip leading zero
@@ -155,17 +160,17 @@ def check_for_response(ticket_number):
         log.close()
 
 
-while True:
+while True:  # Infinite loop
     ticket_list = get_tickets_list()
-    for z in range(0, len(get_tickets_list())):
+    for z in range(0, len(get_tickets_list())):  # Goes through list of ticket numbers
         print(str(datetime.utcnow()) + "> Checking ticket #" + ticket_list[z])
         console = open("log.txt", "a")
         console.write(str(datetime.utcnow()) + "> Checking ticket #" + ticket_list[z] + "\n")
         console.close()
-        try:
+        try:  # Calls all functions of the program
             comment_tracking_update(create_tracking_update(track(get_tracking_number(ticket_list[z]))), ticket_list[z])
             check_for_delivered(ticket_list[z])
             check_for_response(ticket_list[z])
-        except IndexError:
+        except IndexError:  # Prevents crashing due to no tag in ticket
             continue
-    time.sleep(300)
+    time.sleep(300)  # Waits 5 minutes
