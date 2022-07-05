@@ -120,6 +120,9 @@ def check_for_delivered(ticket_number):
             post_comments_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comment?id=" + str(ticket_number) + "&body=" + delivery_inquiry
             post_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
             requests.get(url=post_comments_url, auth=post_comments_auth)  # Posts comment if it has been delivered and if it hasn't been commented already
+            update_tags_url = "https://shsupport.jitbit.com/helpdesk/api/" + "UpdateTicket?id=" + str(ticket_number) + "&tags=" + get_tracking_number(ticket_number) + ",Delivered"
+            update_tags_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
+            requests.request("POST", url=update_tags_url, auth=update_tags_auth)  # Posts comment if it has been delivered and if it hasn't been commented already
             print(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + delivery_inquiry)
             log = open("log.txt", "a")
             log.write(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + delivery_inquiry + "\n")
@@ -148,10 +151,7 @@ def check_for_response(ticket_number):
         log.write(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + close_ticket + "\n")
         log.close()
     if commented_delivery_inquiry and json.loads(comments.text)[0]["Body"][11:12].capitalize() == "N":  # Checks if response is no
-        post_comments_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comment?id=" + str(ticket_number) + "&body=" + get_tracking_number(ticket_number) + "&forTechsOnly=True"
-        post_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
-        requests.get(url=post_comments_url, auth=post_comments_auth)  # Posts tracking number comment before its cleared from tags
-        alert_tech_url = "https://shsupport.jitbit.com/helpdesk/api/UpdateTicket?id=" + str(ticket_number) + "&tags=Needs Technician"
+        alert_tech_url = "https://shsupport.jitbit.com/helpdesk/api/UpdateTicket?id=" + str(ticket_number) + "&tags=" + get_tracking_number(ticket_number) + ",Needs Technician"
         alert_tech_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
         requests.request("POST", url=alert_tech_url, auth=alert_tech_auth)  # Adds tag to alert technician
         print(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + "Needs Technician")
