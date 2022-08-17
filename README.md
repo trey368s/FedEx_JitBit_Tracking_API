@@ -1,6 +1,6 @@
 # FedEx JitBit Tracking API
 FedEx Developer Portal - https://developer.fedex.com/api/en-us/home.html  
-FedEx Authorization API Documentation - https://developer.fedex.com/api/en-us/catalog/track/docs.html  
+FedEx Authorization API Documentation - https://developer.fedex.com/api/en-us/catalog/authorization/v1/docs.html 
 FedEx Track API Documentation - https://developer.fedex.com/api/en-us/catalog/track/docs.html  
 JitBit Helpdesk API Documentation - https://www.jitbit.com/helpdesk/helpdesk-api/#/  
 

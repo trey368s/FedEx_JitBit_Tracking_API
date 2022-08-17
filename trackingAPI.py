@@ -171,6 +171,6 @@ while True:  # Infinite loop
             comment_tracking_update(create_tracking_update(track(get_tracking_number(ticket_list[z]))), ticket_list[z])
             check_for_delivered(ticket_list[z])
             check_for_response(ticket_list[z])
-        except IndexError:  # Prevents crashing due to no tag in ticket
+        except:  # Prevents crashing due to no tag in ticket
             continue
     time.sleep(300)  # Waits 5 minutes
