@@ -161,16 +161,19 @@ def check_for_response(ticket_number):
 
 
 while True:  # Infinite loop
-    ticket_list = get_tickets_list()
-    for z in range(0, len(get_tickets_list())):  # Goes through list of ticket numbers
-        print(str(datetime.utcnow()) + "> Checking ticket #" + ticket_list[z])
-        console = open("log.txt", "a")
-        console.write(str(datetime.utcnow()) + "> Checking ticket #" + ticket_list[z] + "\n")
-        console.close()
-        try:  # Calls all functions of the program
-            comment_tracking_update(create_tracking_update(track(get_tracking_number(ticket_list[z]))), ticket_list[z])
-            check_for_delivered(ticket_list[z])
-            check_for_response(ticket_list[z])
-        except:  # Prevents crashing due to no tag in ticket
-            continue
+    try: 
+        ticket_list = get_tickets_list() # Gets list of all assigned tickets
+        for z in range(0, len(get_tickets_list())):  # Iterates through list of ticket numbers
+            print(str(datetime.utcnow()) + "> Checking ticket #" + ticket_list[z])
+            console = open("log.txt", "a")
+            console.write(str(datetime.utcnow()) + "> Checking ticket #" + ticket_list[z] + "\n")
+            console.close()
+            try:  # Gets tracking number, tracks it, and comments update
+                comment_tracking_update(create_tracking_update(track(get_tracking_number(ticket_list[z]))), ticket_list[z])
+                check_for_delivered(ticket_list[z])
+                check_for_response(ticket_list[z])
+            except:  # Prevents crashing due to no tag in ticket
+                continue
+    except: #Prevents crashing due to no connection
+        continue
     time.sleep(300)  # Waits 5 minutes
