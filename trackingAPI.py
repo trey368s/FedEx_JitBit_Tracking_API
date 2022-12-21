@@ -100,6 +100,9 @@ def comment_tracking_update(track_update, ticket_number):
         post_comments_url = "https://shsupport.jitbit.com/helpdesk/api/" + "comment?id=" + str(ticket_number) + "&body=" + track_update
         post_comments_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
         requests.get(url=post_comments_url, auth=post_comments_auth)
+        update_statuses_url = "https://shsupport.jitbit.com/helpdesk/api/" + "UpdateTicket?id=" + str(ticket_number) + "&statusId=17051"
+        update_statuses_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
+        requests.request("POST", url=update_statuses_url, auth=update_statuses_auth) # Updates ticket status to in transit
         print(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + track_update)
         log = open("log.txt", "a")
         log.write(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + track_update + "\n")
@@ -123,6 +126,9 @@ def check_for_delivered(ticket_number):
             update_tags_url = "https://shsupport.jitbit.com/helpdesk/api/" + "UpdateTicket?id=" + str(ticket_number) + "&tags=" + get_tracking_number(ticket_number) + ",Delivered"
             update_tags_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
             requests.request("POST", url=update_tags_url, auth=update_tags_auth)  # Posts comment if it has been delivered and if it hasn't been commented already
+            update_status_url = "https://shsupport.jitbit.com/helpdesk/api/" + "UpdateTicket?id=" + str(ticket_number) + "&statusId=17052"
+            update_status_auth = HTTPBasicAuth(config.JitBit_Username, config.JitBit_Password)
+            requests.request("POST", url=update_status_url, auth=update_status_auth) # Updates ticket status to delivered
             print(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + delivery_inquiry)
             log = open("log.txt", "a")
             log.write(str(datetime.utcnow()) + "> #" + str(ticket_number) + "-> " + delivery_inquiry + "\n")
@@ -161,7 +167,7 @@ def check_for_response(ticket_number):
 
 
 while True:  # Infinite loop
-    try: 
+    try:
         ticket_list = get_tickets_list() # Gets list of all assigned tickets
         for z in range(0, len(get_tickets_list())):  # Iterates through list of ticket numbers
             print(str(datetime.utcnow()) + "> Checking ticket #" + ticket_list[z])
